@@ -2,49 +2,47 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Equipamentos | Testes de Carga</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Controle de Testes | Manutenção</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
     <header>
-        <div class="header-container">
-            <div>
-                <h1>Painel de Equipamentos</h1>
-                <p>Histórico de Testes de Carga</p>
+        <div class="top-bar">
+            <div class="logo">
+                <i class="fas fa-charging-station"></i>
+                <div>
+                    <h1>Controle de Carga</h1>
+                    <span id="stats">Carregando equipamentos...</span>
+                </div>
             </div>
-            <div class="search-box">
+            <div class="search-container">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Buscar equipamento...">
+                <input type="text" id="searchInput" placeholder="Ex: GE-58...">
             </div>
         </div>
     </header>
 
-    <main class="container">
-        <div id="equipmentsGrid" class="grid">
-            <!-- Os equipamentos serão inseridos aqui pelo JS -->
-        </div>
+    <main id="equipmentsGrid" class="grid-container">
+        <!-- Cards gerados via JS -->
     </main>
 
-    <!-- Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
+    <div id="modal" class="modal-overlay">
+        <div class="modal-card">
             <div class="modal-header">
-                <h2 id="modalTitle">Histórico</h2>
-                <span id="closeModal" class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="historyTableContainer" class="table-container">
-                    <!-- Tabela de histórico será gerada aqui -->
+                <div class="modal-info">
+                    <h2 id="modalTitle">Equipamento</h2>
+                    <p id="modalSubtitle">Histórico de Testes</p>
                 </div>
+                <button id="closeModal" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Tabela inserida via JS -->
             </div>
         </div>
     </div>
 
-    <!-- Biblioteca para ler o CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.2/papaparse.min.js"></script>
     <script src="script.js"></script>
 </body>

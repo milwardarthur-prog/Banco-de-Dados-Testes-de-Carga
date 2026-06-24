@@ -15,82 +15,107 @@ const EQUIPAMENTOS = [
     "GE-108-125", "GE-109-25", "GE-110-80", "GE-111-125", "GE-112-125", "GE-113-360", "GE-114-360"
 ];
 
-let dadosHistorico = [];
+let dadosMaster = [];
 
-// Carregar dados automaticamente do dados.csv
-window.onload = () => {
+// Carrega o CSV automaticamente
+function carregarCSV() {
     Papa.parse("dados.csv", {
         download: true,
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-            dadosHistorico = results.data;
-            renderGrid();
+            dadosMaster = results.data;
+            atualizarStats();
+            renderizar(EQUIPAMENTOS);
         },
         error: function() {
-            console.log("Arquivo dados.csv não encontrado ou vazio. Usando lista padrão.");
-            renderGrid();
+            console.warn("dados.csv não encontrado. Verifique se o arquivo está no GitHub.");
+            renderizar(EQUIPAMENTOS);
         }
-    });
-};
-
-function renderGrid(filter = "") {
-    const grid = document.getElementById('equipmentsGrid');
-    grid.innerHTML = "";
-    
-    EQUIPAMENTOS.filter(e => e.toLowerCase().includes(filter.toLowerCase())).forEach(equip => {
-        const div = document.createElement('div');
-        const temDados = dadosHistorico.some(d => d.Equipamento === equip);
-        
-        div.className = `equip-card ${temDados ? 'has-data' : ''}`;
-        div.textContent = equip;
-        div.onclick = () => openModal(equip);
-        grid.appendChild(div);
     });
 }
 
-function openModal(equip) {
+function atualizarStats() {
+    const comDados = EQUIPAMENTOS.filter(e => dadosMaster.some(d => d.Equipamento === e)).length;
+    document.getElementById('stats').innerText = `${comDados} de ${EQUIPAMENTOS.length} equipamentos com testes`;
+}
+
+function renderizar(lista) {
+    const grid = document.getElementById('equipmentsGrid');
+    grid.innerHTML = "";
+
+    lista.sort().forEach(nome => {
+        const temHistorico = dadosMaster.some(d => d.Equipamento === nome);
+        const card = document.createElement('div');
+        card.className = `card ${temHistorico ? 'has-data' : ''}`;
+        card.innerHTML = `
+            <span class="card-title">${nome}</span>
+            ${temHistorico ? '<span class="status-icon"><i class="fas fa-check-circle"></i> TESTADO</span>' : ''}
+        `;
+        card.onclick = () => abrirHistorico(nome);
+        grid.appendChild(card);
+    });
+}
+
+function abrirHistorico(nome) {
     const modal = document.getElementById('modal');
+    const modalBody = document.getElementById('modalBody');
     const title = document.getElementById('modalTitle');
-    const container = document.getElementById('historyTableContainer');
     
-    title.textContent = `Histórico: ${equip}`;
-    const historicoFiltrado = dadosHistorico.filter(d => d.Equipamento === equip);
-    
-    if (historicoFiltrado.length > 0) {
-        let html = `<table><thead><tr>
-            <th>Data</th>
-            <th>Tensão Vazio</th>
-            <th>Freq. Vazio</th>
-            <th>Amperagem</th>
-            <th>Freq. Carga</th>
-        </tr></thead><tbody>`;
+    title.innerText = nome;
+    const historico = dadosMaster.filter(d => d.Equipamento === nome);
+
+    if (historico.length > 0) {
+        let tabela = `<table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tensão</th>
+                    <th>Vazio (Hz)</th>
+                    <th>Carga (A)</th>
+                    <th>Carga (Hz)</th>
+                </tr>
+            </thead>
+            <tbody>`;
         
-        historicoFiltrado.forEach(row => {
-            html += `<tr>
-                <td>${row.Data || '-'}</td>
-                <td>${row.Tensao_Vazio || '-'}</td>
-                <td>${row.Frequencia_Vazio || '-'}</td>
-                <td>${row.Amperagem || '-'}</td>
-                <td>${row.Frequencia_Carga || '-'}</td>
-            </tr>`;
+        // Inverte para mostrar o mais recente primeiro
+        historico.reverse().forEach(row => {
+            tabela += `
+                <tr>
+                    <td>${row.Data || '-'}</td>
+                    <td>${row.Tensao_Vazio || '-'}</td>
+                    <td>${row.Frequencia_Vazio || '-'}</td>
+                    <td>${row.Amperagem || '-'}</td>
+                    <td>${row.Frequencia_Carga || '-'}</td>
+                </tr>`;
         });
-        html += `</tbody></table>`;
-        container.innerHTML = html;
+        tabela += `</tbody></table>`;
+        modalBody.innerHTML = tabela;
     } else {
-        container.innerHTML = "<p style='text-align:center; color:#94a3b8; padding: 20px;'>Nenhum teste registrado para este equipamento.</p>";
+        modalBody.innerHTML = `<div style="text-align:center; padding: 40px; color: #94a3b8">
+            <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem"></i>
+            <p>Nenhum histórico encontrado para este equipamento.</p>
+        </div>`;
     }
     
     modal.style.display = "block";
+    document.body.style.overflow = "hidden"; // Trava o scroll do fundo
 }
 
-// Lógica de busca
+// Busca
 document.getElementById('searchInput').oninput = (e) => {
-    renderGrid(e.target.value);
+    const termo = e.target.value.toLowerCase();
+    const filtrados = EQUIPAMENTOS.filter(eq => eq.toLowerCase().includes(termo));
+    renderizar(filtrados);
 };
 
-// Fechar modal
-document.getElementById('closeModal').onclick = () => document.getElementById('modal').style.display = "none";
-window.onclick = (event) => {
-    if (event.target == document.getElementById('modal')) document.getElementById('modal').style.display = "none";
-}
+// Fechar Modal
+const fechar = () => {
+    document.getElementById('modal').style.display = "none";
+    document.body.style.overflow = "auto";
+};
+document.getElementById('closeModal').onclick = fechar;
+window.onclick = (e) => { if(e.target.id === 'modal') fechar(); };
+
+// Início
+carregarCSV();

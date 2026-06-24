@@ -25,14 +25,15 @@ function carregarCSV() {
         download: true,
         header: true,
         skipEmptyLines: true,
-        downloadRequestHeaders: { "Cache-Control": "no-cache" },
+        delimiter: "",
         complete: function(results) {
+            console.log("Dados carregados:", results.data);
             if (results.data && results.data.length > 0) {
                 dadosMaster = results.data;
                 atualizarStats();
                 renderizar(EQUIPAMENTOS);
             } else {
-                document.getElementById('stats').innerText = `0 de ${EQUIPAMENTOS.length} equipamentos (CSV vazio)`;
+                document.getElementById('stats').innerText = `Banco de dados vazio ou mal formatado.`;
             }
         },
         error: function(err) {
@@ -52,7 +53,11 @@ function renderizar(lista) {
     const grid = document.getElementById('equipmentsGrid');
     grid.innerHTML = "";
 
-    lista.sort().forEach(nome => {
+    lista.sort((a, b) => {
+        const numA = parseInt(a.split('-')[1]);
+        const numB = parseInt(b.split('-')[1]);
+        return numA - numB;
+    }).forEach(nome => {
         const temHistorico = dadosMaster.some(d => d.Equipamento === nome);
         const card = document.createElement('div');
         card.className = `card ${temHistorico ? 'has-data' : ''}`;

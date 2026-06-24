@@ -17,19 +17,27 @@ const EQUIPAMENTOS = [
 
 let dadosMaster = [];
 
-// Carrega o CSV automaticamente
 function carregarCSV() {
+    renderizar(EQUIPAMENTOS);
+    document.getElementById('stats').innerText = `0 de ${EQUIPAMENTOS.length} equipamentos (Lendo banco...)`;
+
     Papa.parse("dados.csv", {
         download: true,
         header: true,
         skipEmptyLines: true,
+        downloadRequestHeaders: { "Cache-Control": "no-cache" },
         complete: function(results) {
-            dadosMaster = results.data;
-            atualizarStats();
-            renderizar(EQUIPAMENTOS);
+            if (results.data && results.data.length > 0) {
+                dadosMaster = results.data;
+                atualizarStats();
+                renderizar(EQUIPAMENTOS);
+            } else {
+                document.getElementById('stats').innerText = `0 de ${EQUIPAMENTOS.length} equipamentos (CSV vazio)`;
+            }
         },
-        error: function() {
-            console.warn("dados.csv não encontrado. Verifique se o arquivo está no GitHub.");
+        error: function(err) {
+            console.warn("Aviso: dados.csv não encontrado ou inacessível.");
+            document.getElementById('stats').innerText = `0 de ${EQUIPAMENTOS.length} equipamentos (Sem banco de dados)`;
             renderizar(EQUIPAMENTOS);
         }
     });
@@ -61,7 +69,7 @@ function abrirHistorico(nome) {
     const modal = document.getElementById('modal');
     const modalBody = document.getElementById('modalBody');
     const title = document.getElementById('modalTitle');
-    
+
     title.innerText = nome;
     const historico = dadosMaster.filter(d => d.Equipamento === nome);
 
@@ -77,9 +85,8 @@ function abrirHistorico(nome) {
                 </tr>
             </thead>
             <tbody>`;
-        
-        // Inverte para mostrar o mais recente primeiro
-        historico.reverse().forEach(row => {
+
+        [...historico].reverse().forEach(row => {
             tabela += `
                 <tr>
                     <td>${row.Data || '-'}</td>
@@ -89,17 +96,19 @@ function abrirHistorico(nome) {
                     <td>${row.Frequencia_Carga || '-'}</td>
                 </tr>`;
         });
+
         tabela += `</tbody></table>`;
         modalBody.innerHTML = tabela;
     } else {
-        modalBody.innerHTML = `<div style="text-align:center; padding: 40px; color: #94a3b8">
-            <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem"></i>
-            <p>Nenhum histórico encontrado para este equipamento.</p>
-        </div>`;
+        modalBody.innerHTML = `
+            <div style="text-align:center; padding: 40px; color: #94a3b8">
+                <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem"></i>
+                <p>Nenhum histórico encontrado para este equipamento.</p>
+            </div>`;
     }
-    
+
     modal.style.display = "block";
-    document.body.style.overflow = "hidden"; // Trava o scroll do fundo
+    document.body.style.overflow = "hidden";
 }
 
 // Busca
@@ -115,7 +124,7 @@ const fechar = () => {
     document.body.style.overflow = "auto";
 };
 document.getElementById('closeModal').onclick = fechar;
-window.onclick = (e) => { if(e.target.id === 'modal') fechar(); };
+window.onclick = (e) => { if (e.target.id === 'modal') fechar(); };
 
 // Início
 carregarCSV();

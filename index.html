@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Equipamentos | Testes de Carga</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div>
+                <h1>Painel de Equipamentos</h1>
+                <p>Histórico de Testes de Carga</p>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar equipamento...">
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="equipmentsGrid" class="grid">
+            <!-- Os equipamentos serão inseridos aqui pelo JS -->
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Histórico</h2>
+                <span id="closeModal" class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="historyTableContainer" class="table-container">
+                    <!-- Tabela de histórico será gerada aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biblioteca para ler o CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.2/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
